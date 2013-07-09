@@ -1,0 +1,10 @@
+{
+	"name": "jasmine-beforeAll",
+	"license": "MIT",
+	"version": "0.1.0",
+	"repo": "git+https://github.com/nonplus/jasmine-beforeAll.git",
+	"dependencies" : {
+	},
+	"devDependencies": {
+	}
+}
