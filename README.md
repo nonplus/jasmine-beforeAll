@@ -8,21 +8,26 @@ The [Jasmine test framework](http://pivotal.github.io/jasmine/) test framework p
 to allow executing setup and teardown code before executing a test (`it(...)`).
 For tests where setup/teardown is an expensive operation (for example populating a database with test data) this
 can lead to terribly inneficient tests.
-It can also lead to test design that that encourage you to minimimze
-the number of `it(...)` tests which removes the descriptive benefits of BDD.
+It can also lead to test design that that encourages you to minimimze
+the number of `it(...)` tests which obviates the descriptive benefits of BDD tests.
 Finally it can lead to bloated testuites that take so long to execute that they aren't run frequently enough...
 
 This script patches [Jasmine JS](http://pivotal.github.io/jasmine/) to add support for beforeAll() and afterAll() hooks,
-(equivalent to RSpec's `before(:all)` and `after(:all)`).  For more discussion on the need for this functionality,
-see this  [Jasmine pull request](https://github.com/pivotal/jasmine/pull/56).
+(equivalent to RSpec's `before(:all)` and `after(:all)`).
 
-**Caveat:** Monkey-patches internal Jasmine methods (`jasmine.Spec.prototype.addBeforesAndAftersToQueue`,
+**Caveats:**
+
+  * Monkey-patches internal Jasmine methods (`jasmine.Spec.prototype.addBeforesAndAftersToQueue`,
 `jasmine.Suite.prototype.finish` and `jasmine.Runner.prototype.finishCallback`),
 so it'll possibly break in future Jasmine releases.
+  * Not yet tested with Node.
+  * Not yet tested with async setup/teardown.
+  * Not yet tested when setup/teardown callback throws.
 
 ### Why aren't they built in into Jasmin?
 
-I'm not sure what the official reason is.  This  [Jasmine pull request](https://github.com/pivotal/jasmine/pull/56)
+Excellent question!
+I'm not sure what the official reason is, but this  [Jasmine pull request](https://github.com/pivotal/jasmine/pull/56)
 has a good discussion thread on the need for these hooks.
 I suspect that [this comment](https://github.com/pivotal/jasmine/pull/56#issuecomment-774091) might be the
 justification for not including it in Jasmine.  While I agree that using `before/afterEach` nicely isolates
