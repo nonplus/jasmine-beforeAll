@@ -81,3 +81,7 @@ Example After Each
 Example Cleanup
 Top Cleanup
 ```
+
+### License
+
+MIT
