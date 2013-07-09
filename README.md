@@ -1,11 +1,36 @@
 jasmine-beforeAll
 =================
 
-Patches [Jasmine JS](http://pivotal.github.io/jasmine/) to support beforeAll() and afterAll() hooks,
-providing functionality suggested by this  [Jasmine pull request](https://github.com/pivotal/jasmine/pull/56).
-Tested with Jasmine 1.3.1.
+Tested against [Jasmine](http://pivotal.github.io/jasmine/) 1.3.1.
 
-Caveat: Monkey-patches internal Jasmine methods, so it'll possibly break in future Jasmine releases.
+The [Jasmine test framework](http://pivotal.github.io/jasmine/) test framework provides `beforeEach()` and `afterEach()` hooks
+(equivalent to RSpec's `before(:each)` and `after(:each)`)
+to allow executing setup and teardown code before executing a test (`it(...)`).
+For tests where setup/teardown is an expensive operation (for example populating a database with test data) this
+can lead to terribly inneficient tests.
+It can also lead to test design that that encourage you to minimimze
+the number of `it(...)` tests which removes the descriptive benefits of BDD.
+Finally it can lead to bloated testuites that take so long to execute that they aren't run frequently enough...
+
+This script patches [Jasmine JS](http://pivotal.github.io/jasmine/) to add support for beforeAll() and afterAll() hooks,
+(equivalent to RSpec's `before(:all)` and `after(:all)`).  For more discussion on the need for this functionality,
+see this  [Jasmine pull request](https://github.com/pivotal/jasmine/pull/56).
+
+**Caveat:** Monkey-patches internal Jasmine methods (`jasmine.Spec.prototype.addBeforesAndAftersToQueue`,
+`jasmine.Suite.prototype.finish` and `jasmine.Runner.prototype.finishCallback`),
+so it'll possibly break in future Jasmine releases.
+
+### Why aren't they built in into Jasmin?
+
+I'm not sure what the official reason is.  This  [Jasmine pull request](https://github.com/pivotal/jasmine/pull/56)
+has a good discussion thread on the need for these hooks.
+I suspect that [this comment](https://github.com/pivotal/jasmine/pull/56#issuecomment-774091) might be the
+justification for not including it in Jasmine.  While I agree that using `before/afterEach` nicely isolates
+tests from each other, it's simply not pragmatic in many situtations.
+
+Using `before/afterAll` hooks takes more discipline because you have to be careful to ensure that your
+test blocks are idempotent.  That is, executing a test block shouldn't affect other test blocks that
+depend on the same `before/afterAll` setups.
 
 ### Using in Browser:
 
@@ -26,16 +51,18 @@ Include `jasmine-beforeAll` *after* including the main `jasmine.js` script:
 
 ### Using in Tests
 
-This script adds `beforeAll` and `afterAll` hooks to your tests,
-equivalent to RSpec's `before(:all)` and `after(:all)` hooks.
+The `beforeAll` and `afterAll` hooks are similar to Jasmine's `beforeEach` and `afterEach` hooks,
+except that they only execute once.  Use them for doing (expensive) setup/cleanup operations that
+can be shared between (idempotent) tests.  They can be used at the top-level or nested within test
+suites (`describe()` blocks).  They are executed in the order they are declared.
 
-These hooks are similar to Jasmine's `beforeEach` and `afterEach` hooks, except that they only execute once.
-They are useful for doing expensive setup/cleanup operations that can be shared between tests.  They are also
-useful when specs in a test suite contain invariant assertions that don't require automatic cleanup after each
-spec.
+When running a test, the `beforeAll` callbacks it depends are executed (once) *before* any `beforeEach`
+callbacks for the test.
+Conversely, the `afterAll` callbacks are executed (once) *after* any `afterEach` callbacks for the *last*
+test that depends on them.
 
-When running a test, `beforeAll` callbacks will be executed (once) *before* `beforeEach` callbacks.
-Conversely, `afterAll` callbacks are executed (once) *after* `afterEach` callbacks.
+The `before/afterAll` callbacks are executed lazily.  That is, if you don't execut a test that depends on them,
+they will not be executed, either.
 
 ### Example
 
@@ -47,11 +74,11 @@ describe("Top", function() {
   beforAll(function() { console.log("Top Before All"); });
   afterAll(function() { console.log("Top Cleanup"); });
   
-  describe("Example", function() {
-    beforEach(function() { console.log("Example Before Each"); });
-    afterEach(function() { console.log("Example After Each"); });
-    beforAll(function() { console.log("Example Setup"); });
-    afterAll(function() { console.log("Example Cleanup"); });
+  describe("Example 1", function() {
+    beforEach(function() { console.log("Example 1 Before Each"); });
+    afterEach(function() { console.log("Example 1 After Each"); });
+    beforAll(function() { console.log("Example 1 Setup"); });
+    afterAll(function() { console.log("Example 1 Cleanup"); });
     
     it("Test 1", function() {
       console.log("Test 1");
@@ -60,25 +87,41 @@ describe("Top", function() {
     it("Test 2", function() {
       console.log("Test 2");
     });
-
-  });
+  }); // Example 1
   
+  describe("Example 2", function() {
+    beforAll(function() { console.log("Example 2 Setup"); });
+    afterAll(function() { console.log("Example 2 Cleanup"); });
+    
+    it("Test 3", function() {
+      console.log("Test 3");
+    });
+
+    it("Test 4", function() {
+      console.log("Test 4");
+    });
+  }); // Example 2
+
 });
 ```
 
 will genegerate the following console output:
 ```
 Top Setup
-Example Setup
+Example 1 Setup
 Top Before Each
-Example Before Each
+Example 1 Before Each
 Test 1
-Example After Each
+Example 1 After Each
 Top Before Each
-Example Before Each
+Example 1 Before Each
 Test 2
-Example After Each
-Example Cleanup
+Example 1 After Each
+Example 1 Cleanup
+Example 2 Setup
+Test 3
+Test 4
+Example 2 Cleanup
 Top Cleanup
 ```
 
