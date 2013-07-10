@@ -1,5 +1,9 @@
 (function(exports, jasmine) {
-	
+
+	if(!exports) {
+		throw new Error("jasmine-beforeAll couldn't detect globals");
+	}
+
 	/**
 	 * A function that is called once before running the first spec in a suite.
 	 *
@@ -116,6 +120,6 @@
 	}
 	
 })(
-	window || (typeof exports == "object" && exports) || {},
+	(typeof window == "object" && window) || (typeof global == "object" && global),
 	jasmine || require('jasmine')
 );
