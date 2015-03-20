@@ -24,7 +24,7 @@ so it'll possibly break in future Jasmine releases.
   * Not yet tested with async setup/teardown.
   * Not yet tested when setup/teardown callback throws.
 
-### Why aren't they built in into Jasmin?
+### Why aren't they built in into Jasmine?
 
 Excellent question!
 I'm not sure what the official reason is, but this  [Jasmine pull request](https://github.com/pivotal/jasmine/pull/56)
