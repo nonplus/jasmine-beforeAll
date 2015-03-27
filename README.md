@@ -3,6 +3,8 @@ jasmine-beforeAll
 
 Tested against [Jasmine](http://pivotal.github.io/jasmine/) 1.3.1.
 
+Note: as of Jasmine 2.1 (released 14 Nov 2014), there is a [beforeAll and afterAll](https://github.com/jasmine/jasmine/blob/master/release_notes/2.1.0.md#jasmine-core-210-release-notes) function built into the framework.
+
 The [Jasmine test framework](http://pivotal.github.io/jasmine/) test framework provides `beforeEach()` and `afterEach()` hooks
 (equivalent to RSpec's `before(:each)` and `after(:each)`)
 to allow executing setup and teardown code before executing a test (`it(...)`).
